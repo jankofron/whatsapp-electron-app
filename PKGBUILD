@@ -1,6 +1,6 @@
 # Maintainer: Jan Kofron <jan.kofron@gmail.com>
 pkgname=whatsapp-electron-app
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="Whatsapp wrapper (Electron)"
 arch=('x86_64')
@@ -23,6 +23,7 @@ build() {
 }
 
 package() {
+  set -x
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   # App resources
@@ -30,7 +31,7 @@ package() {
   install -m644 app.asar "${pkgdir}/${_appdir}/app.asar"
 
   # Icons
-  install -Dm644 assets/icons/icon.png \
+  install -Dm644 assets/icons/wa.png \
     "${pkgdir}/usr/share/icons/hicolor/512x512/apps/${pkgname}.png"
 
   # Desktop launcher uses system electron to run our asar
