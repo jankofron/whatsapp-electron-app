@@ -7,6 +7,18 @@ const START_URL = 'https://web.whatsapp.com/';
 const PARTITION = 'persist:whatsapp';
 let win, tray, unread = 0;
 
+function extractUnreadFromTitle(title = '') {
+  const m = /^\((\d+)\)\s+/.exec(title);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+function setUnread(count) {
+  count = Math.max(0, count | 0);
+  const iconName = count > 0 ? 'wa-unread.png' : 'wa.png';
+  tray?.setImage(nativeImage.createFromPath(path.join(__dirname, 'assets/icons', iconName)));
+}
+
+
 function allowWhatsAppPermissions() {
   const ses = session.fromPartition(PARTITION);
   // Auto-allow notifications for web.whatsapp.com
@@ -39,6 +51,13 @@ function createWindow() {
       partition: PARTITION
     }
   });
+  
+  win.on('page-title-updated', (e, title) => {
+  // Prevent the OS from showing the changing title as a notification tooltip (optional)
+    e.preventDefault();
+    setUnread(extractUnreadFromTitle(title));
+  });
+
 
   // No menu bar
   win.setMenu(null);
