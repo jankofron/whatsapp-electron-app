@@ -1,6 +1,6 @@
 # Maintainer: Jan Kofron <jan.kofron@gmail.com>
 pkgname=whatsapp-electron-app
-pkgver=1.0.4
+pkgver=1.0.5
 pkgrel=1
 pkgdesc="Whatsapp wrapper (Electron)"
 arch=('x86_64')
