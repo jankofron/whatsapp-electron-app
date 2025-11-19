@@ -14,7 +14,7 @@ function extractUnreadFromTitle(title = '') {
 
 function setUnread(count) {
   count = Math.max(0, count | 0);
-  const iconName = count > 0 ? 'wa-unread.png' : 'wa.png';
+  const iconName = count > 0 ? 'wa-unread.png' : 'icon.png';
   tray?.setImage(nativeImage.createFromPath(path.join(__dirname, 'assets/icons', iconName)));
 }
 
@@ -42,7 +42,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     show: false,
-    icon: path.join(__dirname, 'assets/icons/wa.png'),
+    icon: path.join(__dirname, 'assets/icons/icon.png'),
     webPreferences: {
       contextIsolation: true,
       sandbox: true,
@@ -103,7 +103,7 @@ function saveLastUrl(url) {
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, 'assets/icons/wa.png');
+  const iconPath = path.join(__dirname, 'assets/icons/icon.png');
   tray = new Tray(nativeImage.createFromPath(iconPath));
   tray.setToolTip('WhatsApp');
 
