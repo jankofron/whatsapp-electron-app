@@ -123,22 +123,6 @@ function createTray() {
   });
 }
 
-function setUnread(count) {
-  unread = Math.max(0, count|0);
-  // Change tray icon
-  const icon = unread > 0 ? 'wa-unread.png' : 'wa.png';
-  tray.setImage(nativeImage.createFromPath(path.join(__dirname, 'assets/icons', icon)));
-
-  // Badge count (works on some Linux DEs; harmless elsewhere)
-  try { app.setBadgeCount(unread); } catch {}
-
-  // (Optional) flash on unread if window hidden
-  if (unread > 0 && win && !win.isVisible()) {
-    win.flashFrame(true);
-    setTimeout(() => win && win.flashFrame(false), 1500);
-  }
-}
-
 // IPC from preload: unread count and notification mirroring
 ipcMain.on('unread-count', (_evt, count) => setUnread(count));
 ipcMain.on('notify', (_evt, payload) => {
