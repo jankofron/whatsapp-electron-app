@@ -15,27 +15,37 @@ sha256sums=('19d8e32a92a866a1ed2288275553ba85bf25cd3cd58cbb826a51ea23859f29cc')
 _appdir="usr/lib/${pkgname}"
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
   local _builddir="${srcdir}/${pkgname}-build"
+  local _srcroot="${srcdir}/${pkgname}-${pkgver}"
+
+  # When running makepkg from this repository, prefer local sources so
+  # packaging stays in sync with current runtime behavior.
+  if [[ -f "${startdir}/main.js" && -d "${startdir}/assets" ]]; then
+    _srcroot="${startdir}"
+  fi
 
   # Stage only runtime files into the asar archive.
   rm -rf "${_builddir}"
   install -d "${_builddir}"
-  cp -r main.js preload.js package.json assets "${_builddir}/"
+  cp -r "${_srcroot}/main.js" "${_srcroot}/preload.js" "${_srcroot}/package.json" "${_srcroot}/assets" "${_builddir}/"
 
   # Build app.asar (no bundled Electron runtime).
   asar pack "${_builddir}" "${srcdir}/app.asar"
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  local _srcroot="${srcdir}/${pkgname}-${pkgver}"
+
+  if [[ -f "${startdir}/main.js" && -d "${startdir}/assets" ]]; then
+    _srcroot="${startdir}"
+  fi
 
   # App resources
   install -d "${pkgdir}/${_appdir}"
   install -m644 "${srcdir}/app.asar" "${pkgdir}/${_appdir}/app.asar"
 
   # Icons
-  install -Dm644 assets/icons/icon.png \
+  install -Dm644 "${_srcroot}/assets/icons/icon.png" \
     "${pkgdir}/usr/share/icons/hicolor/512x512/apps/${pkgname}.png"
 
   # Desktop launcher uses system electron to run our asar
@@ -57,5 +67,5 @@ Icon=whatsapp-electron-app
 EOF
 
   # License if you have one
-  [[ -f LICENSE ]] && install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  [[ -f "${_srcroot}/LICENSE" ]] && install -Dm644 "${_srcroot}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
