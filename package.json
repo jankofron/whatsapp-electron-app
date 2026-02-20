@@ -7,6 +7,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
+    "start:show": "electron . --show",
     "pack:asar": "rm -rf dist/app dist/app.asar && mkdir -p dist/app && cp -r main.js preload.js package.json assets dist/app/ && asar pack dist/app dist/app.asar && rm -rf dist/app"
   },
   "engines": {

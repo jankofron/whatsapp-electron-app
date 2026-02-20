@@ -32,6 +32,16 @@ npm install
 npm start
 ```
 
+Startup behavior:
+
+- Default startup is tray-first (window hidden).
+- Click the tray icon (or tray menu -> `Show`) to open the main window.
+- To start with the window visible, use:
+
+```bash
+npm run start:show
+```
+
 ## Packaging (No electron-builder)
 
 This project does not use `electron-builder`.

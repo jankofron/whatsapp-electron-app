@@ -5,6 +5,7 @@ const MODERN_CHROME_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KH
 
 const START_URL = 'https://web.whatsapp.com/';
 const PARTITION = 'persist:whatsapp';
+const START_MINIMIZED = !process.argv.includes('--show');
 let win, tray, unread = 0;
 
 function extractUnreadFromTitle(title = '') {
@@ -76,7 +77,9 @@ function createWindow() {
   
   // Load WhatsApp
   win.loadURL(START_URL);
-  win.once('ready-to-show', () => win.show());
+  win.once('ready-to-show', () => {
+    if (!START_MINIMIZED) win.show();
+  });
 
   // Save last URL (optional, to restore to the last chat)
   win.webContents.on('did-navigate', (_e, url) => saveLastUrl(url));
@@ -136,6 +139,13 @@ app.userAgentFallback = MODERN_CHROME_UA;
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
 else {
+  app.on('second-instance', () => {
+    if (!win) return;
+    if (win.isMinimized()) win.restore();
+    if (!win.isVisible()) win.show();
+    win.focus();
+  });
+
   app.whenReady().then(() => {
     allowWhatsAppPermissions();
     createWindow();
@@ -150,4 +160,3 @@ else {
 app.on('window-all-closed', () => {
   // Keep running in tray
 });
-
