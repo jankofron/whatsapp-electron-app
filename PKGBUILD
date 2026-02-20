@@ -9,7 +9,7 @@ license=('LGPL-2.1-only')
 depends=('electron>=40.6.0' 'hicolor-icon-theme' 'libappindicator-gtk3')
 makedepends=('asar')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/jankofron/whatsapp-electron-app/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('SKIP')  # replace with checksum for v1.1.0 source tarball
+sha256sums=('19d8e32a92a866a1ed2288275553ba85bf25cd3cd58cbb826a51ea23859f29cc')
 
 # App install dir (where we put app.asar and resources)
 _appdir="usr/lib/${pkgname}"
