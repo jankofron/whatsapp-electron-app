@@ -1,6 +1,6 @@
 # Maintainer: Jan Kofron <jan.kofron@gmail.com>
 pkgname=whatsapp-electron-app
-pkgver=1.1.0
+pkgver=1.2.0
 pkgrel=1
 pkgdesc="WhatsApp Web wrapper for Linux desktop (Electron)"
 arch=('x86_64')
@@ -9,7 +9,7 @@ license=('LGPL-2.1-only')
 depends=('electron>=40.6.0' 'hicolor-icon-theme' 'libappindicator-gtk3')
 makedepends=('asar')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/jankofron/whatsapp-electron-app/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('19d8e32a92a866a1ed2288275553ba85bf25cd3cd58cbb826a51ea23859f29cc')
+sha256sums=('SKIP')  # replace with checksum for v1.2.0 source tarball
 
 # App install dir (where we put app.asar and resources)
 _appdir="usr/lib/${pkgname}"
@@ -51,7 +51,7 @@ package() {
   # Desktop launcher uses system electron to run our asar
   install -Dm755 /dev/stdin "${pkgdir}/usr/bin/${pkgname}" <<'EOF'
 #!/bin/sh
-exec /usr/bin/electron /usr/lib/whatsapp-electron-app/app.asar "$@"
+exec /usr/bin/electron --class=whatsapp-electron-app /usr/lib/whatsapp-electron-app/app.asar "$@"
 EOF
 
   # .desktop file
@@ -64,6 +64,7 @@ Terminal=false
 Type=Application
 Categories=Network;InstantMessaging;
 Icon=whatsapp-electron-app
+StartupWMClass=whatsapp-electron-app
 EOF
 
   # License if you have one

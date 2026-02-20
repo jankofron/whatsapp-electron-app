@@ -7,6 +7,43 @@ const START_URL = 'https://web.whatsapp.com/';
 const PARTITION = 'persist:whatsapp';
 const START_MINIMIZED = !process.argv.includes('--show');
 let win, tray, unread = 0;
+const NOTIFICATION_CLICK_BRIDGE_SCRIPT = `
+(() => {
+  try {
+    if (window.__waNotificationClickBridgeInstalled) return true;
+    window.__waNotificationClickBridgeInstalled = true;
+
+    const notifyMain = () => {
+      try {
+        window.waDesktop?.showMainWindow?.();
+      } catch {}
+    };
+
+    if (typeof window.Notification === 'function') {
+      const NativeNotification = window.Notification;
+      window.Notification = new Proxy(NativeNotification, {
+        construct(target, args, newTarget) {
+          const notification = Reflect.construct(target, args, newTarget);
+          try {
+            notification.addEventListener('click', notifyMain);
+          } catch {}
+          return notification;
+        }
+      });
+    }
+  } catch {}
+  return true;
+})();
+`;
+
+function showMainWindow() {
+  if (!win || win.isDestroyed()) return;
+  if (win.isMinimized()) win.restore();
+  if (!win.isVisible()) win.show();
+  win.moveTop();
+  app.focus();
+  win.focus();
+}
 
 function extractUnreadFromTitle(title = '') {
   const m = /^\((\d+)\)\s+/.exec(title);
@@ -80,6 +117,9 @@ function createWindow() {
   win.once('ready-to-show', () => {
     if (!START_MINIMIZED) win.show();
   });
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.executeJavaScript(NOTIFICATION_CLICK_BRIDGE_SCRIPT).catch(() => {});
+  });
 
   // Save last URL (optional, to restore to the last chat)
   win.webContents.on('did-navigate', (_e, url) => saveLastUrl(url));
@@ -111,7 +151,7 @@ function createTray() {
   tray.setToolTip('WhatsApp');
 
   const menu = Menu.buildFromTemplate([
-    { label: 'Show', click: () => { win.show(); win.focus(); } },
+    { label: 'Show', click: () => showMainWindow() },
     { label: 'Hide', click: () => win.hide() },
     { type: 'separator' },
     { label: 'Reload', click: () => win.webContents.reload() },
@@ -122,7 +162,7 @@ function createTray() {
 
   tray.on('click', () => {
     if (!win) return;
-    if (win.isVisible()) win.hide(); else { win.show(); win.focus(); }
+    if (win.isVisible()) win.hide(); else showMainWindow();
   });
 }
 
@@ -132,6 +172,7 @@ ipcMain.on('notify', (_evt, payload) => {
   // You normally don’t need to relay notifications: site already shows native ones.
   // Kept here in case you later want to route them via main or do OS-native fallbacks.
 });
+ipcMain.on('show-main-window', () => showMainWindow());
 
 // (Optional but nice) make it global for workers too:
 app.userAgentFallback = MODERN_CHROME_UA;
@@ -140,10 +181,7 @@ const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
 else {
   app.on('second-instance', () => {
-    if (!win) return;
-    if (win.isMinimized()) win.restore();
-    if (!win.isVisible()) win.show();
-    win.focus();
+    showMainWindow();
   });
 
   app.whenReady().then(() => {
@@ -154,6 +192,7 @@ else {
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    else showMainWindow();
   });
 }
 
